@@ -1,4 +1,8 @@
-use serde::{Deserialize, Serialize};
+use crate::components::meals::MealsView;
+use crate::components::nav::{Nav, Tab};
+use crate::components::planner::PlannerView;
+use crate::components::shopping::ShoppingView;
+use crate::types::*;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
@@ -9,74 +13,100 @@ extern "C" {
     async fn invoke(cmd: &str, args: JsValue) -> JsValue;
 }
 
-#[derive(Serialize, Deserialize)]
-struct GreetArgs<'a> {
-    name: &'a str,
-}
-
 #[function_component(App)]
 pub fn app() -> Html {
-    let greet_input_ref = use_node_ref();
+    let active_tab = use_state(|| Tab::Meals);
+    let meals = use_state(Vec::<MealWithIngredients>::new);
+    let week_plan = use_state(Vec::<WeekPlanEntry>::new);
+    let shopping_list = use_state(Vec::<ShoppingListEntry>::new);
 
-    let name = use_state(|| String::new());
-
-    let greet_msg = use_state(|| String::new());
-    {
-        let greet_msg = greet_msg.clone();
-        let name = name.clone();
-        let name2 = name.clone();
-        use_effect_with(
-            name2,
-            move |_| {
-                spawn_local(async move {
-                    if name.is_empty() {
-                        return;
-                    }
-
-                    let args = serde_wasm_bindgen::to_value(&GreetArgs { name: &*name }).unwrap();
-                    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-                    let new_msg = invoke("greet", args).await.as_string().unwrap();
-                    greet_msg.set(new_msg);
-                });
-
-                || {}
-            },
-        );
-    }
-
-    let greet = {
-        let name = name.clone();
-        let greet_input_ref = greet_input_ref.clone();
-        Callback::from(move |e: SubmitEvent| {
-            e.prevent_default();
-            name.set(
-                greet_input_ref
-                    .cast::<web_sys::HtmlInputElement>()
-                    .unwrap()
-                    .value(),
-            );
+    let load_meals = {
+        let meals = meals.clone();
+        Callback::from(move |_: ()| {
+            let meals = meals.clone();
+            spawn_local(async move {
+                let result = invoke("get_meals", JsValue::NULL).await;
+                if let Ok(data) = serde_wasm_bindgen::from_value::<Vec<MealWithIngredients>>(result) {
+                    meals.set(data);
+                }
+            });
         })
     };
 
+    let load_week_plan = {
+        let week_plan = week_plan.clone();
+        Callback::from(move |_: ()| {
+            let week_plan = week_plan.clone();
+            spawn_local(async move {
+                let result = invoke("get_week_plan", JsValue::NULL).await;
+                if let Ok(data) = serde_wasm_bindgen::from_value::<Vec<WeekPlanEntry>>(result) {
+                    week_plan.set(data);
+                }
+            });
+        })
+    };
+
+    let load_shopping = {
+        let shopping_list = shopping_list.clone();
+        Callback::from(move |_: ()| {
+            let shopping_list = shopping_list.clone();
+            spawn_local(async move {
+                let result = invoke("get_shopping_list", JsValue::NULL).await;
+                if let Ok(data) = serde_wasm_bindgen::from_value::<Vec<ShoppingListEntry>>(result) {
+                    shopping_list.set(data);
+                }
+            });
+        })
+    };
+
+    {
+        let load_meals = load_meals.clone();
+        let load_week_plan = load_week_plan.clone();
+        let load_shopping = load_shopping.clone();
+        use_effect_with((), move |_| {
+            load_meals.emit(());
+            load_week_plan.emit(());
+            load_shopping.emit(());
+            || {}
+        });
+    }
+
+    let on_refresh = {
+        let load_meals = load_meals.clone();
+        let load_week_plan = load_week_plan.clone();
+        let load_shopping = load_shopping.clone();
+        Callback::from(move |_: ()| {
+            load_meals.emit(());
+            load_week_plan.emit(());
+            load_shopping.emit(());
+        })
+    };
+
+    let on_tab_change = {
+        let active_tab = active_tab.clone();
+        Callback::from(move |tab: Tab| active_tab.set(tab))
+    };
+
     html! {
-        <main class="container">
-            <h1>{"Welcome to Tauri + Yew"}</h1>
-
-            <div class="row">
-                <a href="https://tauri.app" target="_blank">
-                    <img src="public/tauri.svg" class="logo tauri" alt="Tauri logo"/>
-                </a>
-                <a href="https://yew.rs" target="_blank">
-                    <img src="public/yew.png" class="logo yew" alt="Yew logo"/>
-                </a>
+        <div class="app-shell">
+            <div class="app-content">
+                { match *active_tab {
+                    Tab::Meals => html! {
+                        <MealsView meals={(*meals).clone()} on_refresh={on_refresh.clone()} />
+                    },
+                    Tab::Planner => html! {
+                        <PlannerView
+                            meals={(*meals).clone()}
+                            week_plan={(*week_plan).clone()}
+                            on_refresh={on_refresh.clone()}
+                        />
+                    },
+                    Tab::Shopping => html! {
+                        <ShoppingView shopping_list={(*shopping_list).clone()} on_refresh={on_refresh.clone()} />
+                    },
+                }}
             </div>
-            <p>{"Click on the Tauri and Yew logos to learn more."}</p>
-
-            <form class="row" onsubmit={greet}>
-                <input id="greet-input" ref={greet_input_ref} placeholder="Enter a name..." />
-                <button type="submit">{"Greet"}</button>
-            </form>
-            <p>{ &*greet_msg }</p>
-        </main>
+            <Nav active={(*active_tab).clone()} on_change={on_tab_change} />
+        </div>
     }
 }
