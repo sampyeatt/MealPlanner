@@ -307,20 +307,17 @@ pub fn meals_view(props: &MealsProps) -> Html {
                                             })
                                         }}
                                     />
-                                    <select class="ing-input-unit"
-                                        onchange={{
+                                    <input
+                                        type="text" placeholder="Unit" class="ing-input-unit"
+                                        value={(*new_ing_unit).clone()}
+                                        oninput={{
                                             let u = new_ing_unit.clone();
-                                            Callback::from(move |e: Event| {
-                                                let el: web_sys::HtmlSelectElement = e.target_unchecked_into();
+                                            Callback::from(move |e: InputEvent| {
+                                                let el: web_sys::HtmlInputElement = e.target_unchecked_into();
                                                 u.set(el.value());
                                             })
                                         }}
-                                    >
-                                        { for ["oz","lbs","cups","ml","eaches","floz","tbs","tbsp"].iter().map(|unit| {
-                                            let selected = *unit == (*new_ing_unit).as_str();
-                                            html! { <option value={*unit} selected={selected}>{ unit }</option> }
-                                        })}
-                                    </select>
+                                    />
                                     <button type="button" class="btn-add-ing" onclick={on_add_draft_ingredient}>
                                         { "+" }
                                     </button>
@@ -410,17 +407,38 @@ fn edit_meal_modal(props: &EditMealModalProps) -> Html {
     let on_close = props.on_close.clone();
     let on_refresh = props.on_refresh.clone();
 
-    let on_submit = {
+    let meal_state = use_state(|| props.meal.clone());
+    let edit_state = use_state(|| IngredientEditState::None);
+    let ing_name = use_state(String::new);
+    let ing_qty = use_state(|| "1".to_string());
+    let ing_unit = use_state(|| "cups".to_string());
+
+    let refresh_meal = {
+        let meal_state = meal_state.clone();
+        Callback::from(move |_: ()| {
+            let meal_state = meal_state.clone();
+            spawn_local(async move {
+                let result = invoke("get_meals", JsValue::NULL).await;
+                if let Ok(meals) = serde_wasm_bindgen::from_value::<Vec<MealWithIngredients>>(result) {
+                    if let Some(updated) = meals.into_iter().find(|m| m.id == meal_id) {
+                        meal_state.set(updated);
+                    }
+                }
+            });
+        })
+    };
+
+    let on_save_meal = {
         let name = name.clone();
         let desc = desc.clone();
         let on_close = on_close.clone();
         let on_refresh = on_refresh.clone();
-        Callback::from(move |e: SubmitEvent| {
-            e.prevent_default();
+        Callback::from(move |_: MouseEvent| {
             let n = (*name).clone();
             let d = (*desc).clone();
             let on_close = on_close.clone();
             let on_refresh = on_refresh.clone();
+            if n.trim().is_empty() { return; }
             spawn_local(async move {
                 let args = serde_wasm_bindgen::to_value(&UpdateMealArgs { id: meal_id, name: n, description: d }).unwrap();
                 invoke("update_meal", args).await;
@@ -430,39 +448,196 @@ fn edit_meal_modal(props: &EditMealModalProps) -> Html {
         })
     };
 
+    let start_add = {
+        let es = edit_state.clone();
+        let n = ing_name.clone();
+        let q = ing_qty.clone();
+        let u = ing_unit.clone();
+        Callback::from(move |_: MouseEvent| {
+            n.set(String::new());
+            q.set("1".to_string());
+            u.set("cups".to_string());
+            es.set(IngredientEditState::Adding);
+        })
+    };
+
+    let cancel_edit_ing = {
+        let es = edit_state.clone();
+        Callback::from(move |_: MouseEvent| es.set(IngredientEditState::None))
+    };
+
+    let submit_ingredient = {
+        let es = edit_state.clone();
+        let n = ing_name.clone();
+        let q = ing_qty.clone();
+        let u = ing_unit.clone();
+        let refresh = refresh_meal.clone();
+        let on_refresh = on_refresh.clone();
+        Callback::from(move |e: SubmitEvent| {
+            e.prevent_default();
+            let name_val = (*n).clone();
+            let qty_val: f64 = (*q).parse().unwrap_or(1.0);
+            let unit_val = (*u).clone();
+            let es_val = (*es).clone();
+            let es = es.clone();
+            let refresh = refresh.clone();
+            let on_refresh = on_refresh.clone();
+            if name_val.trim().is_empty() { return; }
+            spawn_local(async move {
+                match es_val {
+                    IngredientEditState::Adding => {
+                        let args = serde_wasm_bindgen::to_value(&AddIngredientArgs {
+                            meal_id, name: name_val, quantity: qty_val, unit: unit_val,
+                        }).unwrap();
+                        invoke("add_ingredient", args).await;
+                    }
+                    IngredientEditState::Editing(ing) => {
+                        let args = serde_wasm_bindgen::to_value(&UpdateIngredientArgs {
+                            id: ing.id, name: name_val, quantity: qty_val, unit: unit_val,
+                        }).unwrap();
+                        invoke("update_ingredient", args).await;
+                    }
+                    IngredientEditState::None => {}
+                }
+                es.set(IngredientEditState::None);
+                refresh.emit(());
+                on_refresh.emit(());
+            });
+        })
+    };
+
+    let on_delete_ing = {
+        let refresh = refresh_meal.clone();
+        let on_refresh = on_refresh.clone();
+        Callback::from(move |id: i64| {
+            let refresh = refresh.clone();
+            let on_refresh = on_refresh.clone();
+            spawn_local(async move {
+                let args = serde_wasm_bindgen::to_value(&IdArgs { id }).unwrap();
+                invoke("delete_ingredient", args).await;
+                refresh.emit(());
+                on_refresh.emit(());
+            });
+        })
+    };
+
+    let on_edit_ing = {
+        let es = edit_state.clone();
+        let n = ing_name.clone();
+        let q = ing_qty.clone();
+        let u = ing_unit.clone();
+        Callback::from(move |ing: Ingredient| {
+            n.set(ing.name.clone());
+            q.set(ing.quantity.to_string());
+            u.set(ing.unit.clone());
+            es.set(IngredientEditState::Editing(ing));
+        })
+    };
+
+    let current_meal = (*meal_state).clone();
     let overlay_close = close_cb(on_close.clone());
     let cancel_close = close_cb(on_close.clone());
 
     html! {
         <div class="modal-overlay" onclick={overlay_close}>
-            <div class="modal" onclick={Callback::from(|e: MouseEvent| e.stop_propagation())}>
+            <div class="modal modal-large" onclick={Callback::from(|e: MouseEvent| e.stop_propagation())}>
                 <h3>{ "Edit Meal" }</h3>
-                <form onsubmit={on_submit}>
-                    <div class="form-group">
-                        <label>{ "Name" }</label>
-                        <input type="text" value={(*name).clone()} oninput={{
-                            let n = name.clone();
-                            Callback::from(move |e: InputEvent| {
-                                let el: web_sys::HtmlInputElement = e.target_unchecked_into();
-                                n.set(el.value());
-                            })
-                        }} />
-                    </div>
-                    <div class="form-group">
-                        <label>{ "Description" }</label>
-                        <textarea value={(*desc).clone()} oninput={{
-                            let d = desc.clone();
-                            Callback::from(move |e: InputEvent| {
-                                let el: web_sys::HtmlTextAreaElement = e.target_unchecked_into();
-                                d.set(el.value());
-                            })
-                        }} />
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn-ghost" onclick={cancel_close}>{ "Cancel" }</button>
-                        <button type="submit" class="btn-primary">{ "Save" }</button>
-                    </div>
-                </form>
+                <div class="form-group">
+                    <label>{ "Name" }</label>
+                    <input type="text" value={(*name).clone()} oninput={{
+                        let n = name.clone();
+                        Callback::from(move |e: InputEvent| {
+                            let el: web_sys::HtmlInputElement = e.target_unchecked_into();
+                            n.set(el.value());
+                        })
+                    }} />
+                </div>
+                <div class="form-group">
+                    <label>{ "Description" }</label>
+                    <textarea value={(*desc).clone()} oninput={{
+                        let d = desc.clone();
+                        Callback::from(move |e: InputEvent| {
+                            let el: web_sys::HtmlTextAreaElement = e.target_unchecked_into();
+                            d.set(el.value());
+                        })
+                    }} />
+                </div>
+
+                <h4>{ "Ingredients" }</h4>
+                <div class="ingredient-list">
+                    { for current_meal.ingredients.iter().map(|ing| {
+                        let ing_clone = ing.clone();
+                        let ing_id = ing.id;
+                        let on_delete_ing = on_delete_ing.clone();
+                        let on_edit_ing = on_edit_ing.clone();
+                        html! {
+                            <div class="ingredient-row">
+                                <span class="ing-name">{ &ing.name }</span>
+                                <span class="ing-qty">{ format!("{} {}", ing.quantity, ing.unit) }</span>
+                                <div class="ing-actions">
+                                    <button type="button" class="btn-icon-sm"
+                                        onclick={Callback::from(move |_: MouseEvent| on_edit_ing.emit(ing_clone.clone()))}>{ "✏️" }</button>
+                                    <button type="button" class="btn-icon-sm danger"
+                                        onclick={Callback::from(move |_: MouseEvent| on_delete_ing.emit(ing_id))}>{ "🗑" }</button>
+                                </div>
+                            </div>
+                        }
+                    })}
+                </div>
+
+                { match (*edit_state).clone() {
+                    IngredientEditState::None => html! {
+                        <button type="button" class="btn-outline" onclick={start_add}>{ "+ Add Ingredient" }</button>
+                    },
+                    _ => html! {
+                        <form class="ingredient-form" onsubmit={submit_ingredient}>
+                            <div class="ingredient-form-row">
+                                <input
+                                    type="text" placeholder="Ingredient name" class="ing-input-name"
+                                    value={(*ing_name).clone()}
+                                    oninput={{
+                                        let n = ing_name.clone();
+                                        Callback::from(move |e: InputEvent| {
+                                            let el: web_sys::HtmlInputElement = e.target_unchecked_into();
+                                            n.set(el.value());
+                                        })
+                                    }}
+                                />
+                                <input
+                                    type="number" placeholder="Qty" step="0.01" class="ing-input-qty"
+                                    value={(*ing_qty).clone()}
+                                    oninput={{
+                                        let q = ing_qty.clone();
+                                        Callback::from(move |e: InputEvent| {
+                                            let el: web_sys::HtmlInputElement = e.target_unchecked_into();
+                                            q.set(el.value());
+                                        })
+                                    }}
+                                />
+                                <input
+                                    type="text" placeholder="Unit" class="ing-input-unit"
+                                    value={(*ing_unit).clone()}
+                                    oninput={{
+                                        let u = ing_unit.clone();
+                                        Callback::from(move |e: InputEvent| {
+                                            let el: web_sys::HtmlInputElement = e.target_unchecked_into();
+                                            u.set(el.value());
+                                        })
+                                    }}
+                                />
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" class="btn-ghost" onclick={cancel_edit_ing}>{ "Cancel" }</button>
+                                <button type="submit" class="btn-primary">{ "Add" }</button>
+                            </div>
+                        </form>
+                    }
+                }}
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-ghost" onclick={cancel_close}>{ "Cancel" }</button>
+                    <button type="button" class="btn-primary" onclick={on_save_meal}>{ "Save Meal" }</button>
+                </div>
             </div>
         </div>
     }
@@ -660,20 +835,17 @@ fn view_meal_modal(props: &ViewMealModalProps) -> Html {
                                         })
                                     }}
                                 />
-                                <select class="ing-input-unit"
-                                    onchange={{
+                                <input
+                                    type="text" placeholder="Unit" class="ing-input-unit"
+                                    value={(*ing_unit).clone()}
+                                    oninput={{
                                         let u = ing_unit.clone();
-                                        Callback::from(move |e: Event| {
-                                            let el: web_sys::HtmlSelectElement = e.target_unchecked_into();
+                                        Callback::from(move |e: InputEvent| {
+                                            let el: web_sys::HtmlInputElement = e.target_unchecked_into();
                                             u.set(el.value());
                                         })
                                     }}
-                                >
-                                    { for ["oz","lbs","cups","ml","eaches","floz","tbs","tbsp"].iter().map(|unit| {
-                                        let selected = *unit == (*ing_unit).as_str();
-                                        html! { <option value={*unit} selected={selected}>{ unit }</option> }
-                                    })}
-                                </select>
+                                />
                             </div>
                             <div class="modal-actions">
                                 <button type="button" class="btn-ghost" onclick={cancel_edit}>{ "Cancel" }</button>

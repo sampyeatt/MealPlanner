@@ -399,9 +399,9 @@ textarea { resize: vertical; min-height: 80px; }
 }
 .btn-add-ing:hover { background: rgba(34,197,94,0.2); }
 
-.ing-input-name { flex: 1; }
-.ing-input-qty { width: 70px; flex: none; }
-.ing-input-unit { width: 80px; flex: none; }
+.ing-input-name { flex: 2; min-width: 0; }
+.ing-input-qty { flex: 1; min-width: 0; }
+.ing-input-unit { flex: 1; min-width: 0; }
 
 /* Week planner */
 .week-grid {
