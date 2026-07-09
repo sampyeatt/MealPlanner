@@ -1,3 +1,11 @@
+# Frontend build output
 /dist/
-/target/
-/Cargo.lock
+
+# Node
+/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor / OS
+.DS_Store
