@@ -1,14 +1,8 @@
+use crate::components::shared::{invoke, IdArgs};
 use crate::types::*;
 use serde::Serialize;
-use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "core"])]
-    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
-}
 
 #[derive(Serialize)]
 struct AddToWeekPlanArgs {
@@ -16,20 +10,15 @@ struct AddToWeekPlanArgs {
     day_of_week: i32,
 }
 
-#[derive(Serialize)]
-struct IdArgs {
-    id: i64,
-}
-
 #[derive(Properties, PartialEq)]
-pub struct PlannerProps {
+pub struct WeeklyPlannerProps {
     pub meals: Vec<MealWithIngredients>,
     pub week_plan: Vec<WeekPlanEntry>,
     pub on_refresh: Callback<()>,
 }
 
-#[function_component(PlannerView)]
-pub fn planner_view(props: &PlannerProps) -> Html {
+#[function_component(WeeklyPlannerView)]
+pub fn weekly_planner_view(props: &WeeklyPlannerProps) -> Html {
     let on_refresh = props.on_refresh.clone();
 
     let on_remove = {

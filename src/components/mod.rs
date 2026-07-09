@@ -1,4 +1,5 @@
 pub mod meals;
 pub mod nav;
-pub mod planner;
+pub mod shared;
 pub mod shopping;
+pub mod weekly_planner;

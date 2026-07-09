@@ -1,17 +1,12 @@
 use crate::components::meals::MealsView;
 use crate::components::nav::{Nav, Tab};
-use crate::components::planner::PlannerView;
+use crate::components::shared::invoke;
 use crate::components::shopping::ShoppingView;
+use crate::components::weekly_planner::WeeklyPlannerView;
 use crate::types::*;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "core"])]
-    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
-}
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -95,7 +90,7 @@ pub fn app() -> Html {
                         <MealsView meals={(*meals).clone()} on_refresh={on_refresh.clone()} />
                     },
                     Tab::Planner => html! {
-                        <PlannerView
+                        <WeeklyPlannerView
                             meals={(*meals).clone()}
                             week_plan={(*week_plan).clone()}
                             on_refresh={on_refresh.clone()}

@@ -51,6 +51,14 @@ pub struct ShoppingIngredient {
 
 pub fn init_db(path: &std::path::Path) -> Result<Connection> {
     let conn = Connection::open(path)?;
+    create_schema(&conn)?;
+    Ok(conn)
+}
+
+/// Enable foreign-key enforcement and create all tables if they don't exist.
+/// Kept separate from `init_db` so tests can build an in-memory database with
+/// the exact same schema.
+pub fn create_schema(conn: &Connection) -> Result<()> {
     conn.execute_batch("PRAGMA foreign_keys = ON;")?;
     conn.execute_batch(
         "CREATE TABLE IF NOT EXISTS meals (
@@ -83,7 +91,7 @@ pub fn init_db(path: &std::path::Path) -> Result<Connection> {
             FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE
         );",
     )?;
-    Ok(conn)
+    Ok(())
 }
 
 pub fn get_meals(conn: &Connection) -> Result<Vec<MealWithIngredients>> {
@@ -283,3 +291,6 @@ pub fn clear_shopping_list(conn: &Connection) -> Result<()> {
     conn.execute_batch("DELETE FROM shopping_list; DELETE FROM shopping_checks;")?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests;

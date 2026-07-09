@@ -1,23 +1,13 @@
+use crate::components::shared::{invoke, MealIdArgs};
 use crate::types::*;
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "core"])]
-    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
-}
-
 #[derive(Serialize)]
 struct IngredientIdArgs {
     ingredient_id: i64,
-}
-
-#[derive(Serialize)]
-struct MealIdArgs {
-    meal_id: i64,
 }
 
 #[derive(Properties, PartialEq)]
