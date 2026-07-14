@@ -9,7 +9,7 @@ export default defineConfig({
   server: {
     // Tauri expects a fixed port; fail if it is taken instead of picking another.
     port: 1420,
-    strictPort: true,
+    strictPort: false,
     watch: {
       // Rust sources are watched by Tauri, not Vite.
       ignored: ["**/src-tauri/**"],

@@ -23,7 +23,14 @@ npm run tauri build
 
 - `src/` — React frontend (Vite + TypeScript)
   - `api.ts` — typed wrappers over the Tauri commands
-  - `components/` — UI components (Nav, meals, weekly planner, shopping)
+  - `hooks/` — TanStack Query hooks over `api.ts`
+  - `store/` — zustand client-UI state (active tab, status toast)
+  - `components/` — UI organised by [Atomic Design](https://bradfrost.com/blog/post/atomic-web-design/):
+    - `atoms/` — primitives (buttons, inputs, chips, toast, empty state)
+    - `molecules/` — small groupings (form field, ingredient row/form, shopping item)
+    - `organisms/` — self-contained sections (meal card, day card, nav, meal modals)
+    - `templates/` — page scaffolds (app shell, view layout)
+    - `pages/` — the three top-level views (meals, planner, shopping)
 - `src-tauri/` — Rust backend (Tauri commands + SQLite via `rusqlite`)
 
 ## Recommended IDE Setup

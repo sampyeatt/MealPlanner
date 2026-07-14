@@ -1,4 +1,5 @@
-import type { Tab } from "../types";
+import type { Tab } from "../../types";
+import { useUiStore } from "../../store/uiStore";
 
 const TABS: { tab: Tab; icon: string; label: string }[] = [
   { tab: "meals", icon: "🍽", label: "Meals" },
@@ -6,19 +7,18 @@ const TABS: { tab: Tab; icon: string; label: string }[] = [
   { tab: "shopping", icon: "🛒", label: "Shopping" },
 ];
 
-interface NavProps {
-  active: Tab;
-  onChange: (tab: Tab) => void;
-}
+/** The fixed bottom tab bar that switches between the three top-level views. */
+export function BottomNav() {
+  const active = useUiStore((s) => s.activeTab);
+  const setActiveTab = useUiStore((s) => s.setActiveTab);
 
-export function Nav({ active, onChange }: NavProps) {
   return (
     <nav className="bottom-nav">
       {TABS.map(({ tab, icon, label }) => (
         <button
           key={tab}
           className={`nav-tab${active === tab ? " active" : ""}`}
-          onClick={() => onChange(tab)}
+          onClick={() => setActiveTab(tab)}
         >
           <span className="nav-icon">{icon}</span>
           <span className="nav-label">{label}</span>

@@ -1,23 +1,18 @@
-import { useState } from "react";
-import { Nav } from "./components/Nav";
-import { MealsView } from "./components/meals/MealsView";
-import { WeeklyPlannerView } from "./components/WeeklyPlannerView";
-import { ShoppingView } from "./components/ShoppingView";
-import type { Tab } from "./types";
+import { BottomNav } from "./components/organisms";
+import { MealsPage, ShoppingPage, WeeklyPlannerPage } from "./components/pages";
+import { AppShell } from "./components/templates";
+import { useUiStore } from "./store/uiStore";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<Tab>("meals");
+  // Server state lives in TanStack Query caches read by each page; the active
+  // tab is client UI state owned by the zustand store.
+  const activeTab = useUiStore((s) => s.activeTab);
 
-  // Server state now lives in TanStack Query caches read by each view, so App
-  // only owns which tab is showing.
   return (
-    <div className="app-shell">
-      <div className="app-content">
-        {activeTab === "meals" && <MealsView />}
-        {activeTab === "planner" && <WeeklyPlannerView />}
-        {activeTab === "shopping" && <ShoppingView />}
-      </div>
-      <Nav active={activeTab} onChange={setActiveTab} />
-    </div>
+    <AppShell nav={<BottomNav />}>
+      {activeTab === "meals" && <MealsPage />}
+      {activeTab === "planner" && <WeeklyPlannerPage />}
+      {activeTab === "shopping" && <ShoppingPage />}
+    </AppShell>
   );
 }

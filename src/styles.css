@@ -5,15 +5,17 @@
 }
 
 :root {
-  --bg: #0f1117;
-  --surface: #1a1d27;
-  --surface2: #22263a;
-  --border: #2e3248;
-  --accent: #22c55e;
-  --accent-dim: #166534;
-  --accent-hover: #16a34a;
-  --text: #f1f5f9;
-  --text-muted: #94a3b8;
+  /* Palette — Primary #679289 (teal), Secondary #003554 (navy), Accent #FFFACA (cream) */
+  --bg: #01202f;            /* darkest navy, derived from the secondary */
+  --surface: #003554;       /* secondary navy — cards, dialogs */
+  --surface2: #0a4a6e;      /* raised navy */
+  --border: #185a7d;        /* navy border */
+  --accent: #679289;        /* primary teal — interactive elements */
+  --accent-dim: #06293f;    /* dim navy backing for accent badges/chips */
+  --accent-hover: #7ba69c;  /* lighter teal for hover */
+  --highlight: #fffaca;     /* accent cream — key highlights (active nav) */
+  --text: #eef4f3;
+  --text-muted: #9db4bf;
   --danger: #ef4444;
   --danger-dim: #450a0a;
   --radius: 10px;
@@ -75,7 +77,7 @@
 }
 
 .nav-tab.active {
-  color: var(--accent);
+  color: var(--highlight);
 }
 
 .nav-icon { font-size: 1.4rem; }
@@ -146,7 +148,7 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.btn-outline:hover { background: rgba(34,197,94,0.08); }
+.btn-outline:hover { background: rgba(103,146,137,0.08); }
 .btn-full { width: 100%; margin-top: 12px; }
 
 .btn-ghost {
@@ -375,7 +377,7 @@
   padding: 0;
   line-height: 1;
 }
-.btn-add-ing:hover { background: rgba(34,197,94,0.2); }
+.btn-add-ing:hover { background: rgba(103,146,137,0.2); }
 
 .ing-input-name { flex: 2; min-width: 0; }
 .ing-input-qty { flex: 1; min-width: 0; }
@@ -615,9 +617,150 @@
   margin: 16px 0 8px;
 }
 
+/* Slightly taller input boxes in the create/edit meal dialogs (name,
+   description, and the ingredient name/qty/unit row). */
+.p-dialog.meal-dialog .p-inputtext,
+.p-dialog.meal-dialog .p-inputnumber-input {
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+}
+
+/* Slightly taller action buttons (Cancel / Create Meal / Save Meal) to match. */
+.p-dialog.meal-dialog .modal-actions .p-button {
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+}
+
 /* Add-ingredient "+" keeps its compact square footprint */
 .btn-add-ing.p-button {
   width: 38px;
   flex-shrink: 0;
   padding: 0;
+}
+
+/* ---- PrimeReact palette recolor -----------------------------------------
+   The imported lara-dark-green theme bakes its green (#34d399) and gray
+   surfaces into literal values, so recoloring means both (a) overriding the
+   theme's design-token variables and (b) overriding the specific rules that
+   use literals. styles.css is imported after the theme, so equal-specificity
+   rules here win by source order.
+
+   Palette: Primary #679289 (teal), Secondary #003554 (navy), Accent #FFFACA. */
+
+:root {
+  --primary-color: #679289;
+  --primary-color-text: #01202f;
+  --text-color: #eef4f3;
+  --text-color-secondary: #9db4bf;
+  --surface-ground: #01202f;
+  --surface-section: #01202f;
+  --surface-card: #003554;
+  --surface-overlay: #003f63;
+  --surface-border: #185a7d;
+  --surface-hover: rgba(255, 255, 255, 0.04);
+  --surface-0: #003554;
+  --surface-50: #0a4a6e;
+  --surface-100: #185a7d;
+  --highlight-bg: rgba(103, 146, 137, 0.22);
+  --highlight-text-color: #eef4f3;
+  --focus-ring: 0 0 0 0.2rem rgba(103, 146, 137, 0.35);
+  --maskbg: rgba(0, 8, 14, 0.6);
+}
+
+/* Solid buttons (primary actions). Scoped with :not(...) so it only ever
+   fills a genuine solid button — never the borderless icon/text/outlined
+   buttons (view/edit/delete, Cancel, "Add to Shopping List"). */
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link) {
+  color: var(--primary-color-text);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+}
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link):not(:disabled):hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: var(--primary-color-text);
+}
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link):not(:disabled):active {
+  background: #8fbab0;
+  border-color: #8fbab0;
+  color: var(--primary-color-text);
+}
+.p-button:focus {
+  box-shadow: var(--focus-ring);
+}
+
+/* Text buttons (icon actions, "Cancel") and outlined ("Add to Shopping List") */
+.p-button.p-button-text,
+.p-button.p-button-outlined {
+  color: var(--accent);
+}
+.p-button.p-button-outlined {
+  border-color: var(--accent);
+}
+.p-button.p-button-text:not(:disabled):hover,
+.p-button.p-button-outlined:not(:disabled):hover {
+  background: rgba(103, 146, 137, 0.1);
+  color: var(--accent);
+}
+.p-button.p-button-outlined:not(:disabled):hover {
+  border-color: var(--accent);
+}
+.p-button.p-button-text:not(:disabled):active,
+.p-button.p-button-outlined:not(:disabled):active {
+  background: rgba(103, 146, 137, 0.2);
+  color: var(--accent);
+}
+
+/* Text inputs / textarea / number input: navy field on the navy dialog */
+.p-inputtext {
+  background: #012a40;
+  border-color: var(--border);
+  color: var(--text);
+}
+.p-inputtext:enabled:hover,
+.p-dropdown:not(.p-disabled):hover {
+  border-color: var(--accent);
+}
+.p-inputtext:enabled:focus,
+.p-dropdown:not(.p-disabled).p-focus {
+  box-shadow: var(--focus-ring);
+  border-color: var(--accent);
+}
+
+/* Dropdown control + panel */
+.p-dropdown {
+  background: #012a40;
+  border-color: var(--border);
+}
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+  color: var(--text);
+  background: rgba(103, 146, 137, 0.22);
+}
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight.p-focus {
+  background: rgba(103, 146, 137, 0.3);
+}
+
+/* Checkbox — checked state and focus */
+.p-checkbox.p-highlight .p-checkbox-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.p-checkbox:not(.p-disabled):has(.p-checkbox-input:hover) .p-checkbox-box {
+  border-color: var(--accent);
+}
+.p-checkbox:not(.p-disabled):has(.p-checkbox-input:focus-visible) .p-checkbox-box {
+  box-shadow: var(--focus-ring);
+  border-color: var(--accent);
+}
+
+/* Progress bar fill */
+.p-progressbar .p-progressbar-value {
+  background: var(--accent);
+}
+
+/* Dialog surface (header + content) uses the navy card color */
+.p-dialog .p-dialog-header,
+.p-dialog .p-dialog-content {
+  background: var(--surface);
+  color: var(--text);
 }

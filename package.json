@@ -16,7 +16,8 @@
     "primereact": "^10.9.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-hook-form": "^7.54.2"
+    "react-hook-form": "^7.54.2",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",
