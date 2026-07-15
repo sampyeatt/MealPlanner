@@ -88,7 +88,7 @@ export function CreateMealModal({ onClose }: CreateMealModalProps) {
       dismissableMask
       className="meal-dialog"
     >
-      <form onSubmit={submit}>
+      <form onSubmit={submit} className="meal-form">
         <FormField label="Name">
           <Controller
             name="name"
@@ -102,6 +102,7 @@ export function CreateMealModal({ onClose }: CreateMealModalProps) {
                 value={field.value}
                 onChange={(e) => field.onChange(e.target.value)}
                 onBlur={field.onBlur}
+                className={'text-input'}
               />
             )}
           />
@@ -119,6 +120,7 @@ export function CreateMealModal({ onClose }: CreateMealModalProps) {
                 value={field.value}
                 onChange={(e) => field.onChange(e.target.value)}
                 onBlur={field.onBlur}
+                className={'text-input'}
               />
             )}
           />
@@ -146,8 +148,9 @@ export function CreateMealModal({ onClose }: CreateMealModalProps) {
             text
             severity="secondary"
             onClick={onClose}
+            className={'btn-actions'}
           />
-          <Button type="submit" label="Create Meal" />
+          <Button type="submit" label="Create Meal" className={'btn-actions'} />
         </div>
       </form>
     </Dialog>

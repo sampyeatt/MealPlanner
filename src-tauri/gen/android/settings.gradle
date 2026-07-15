@@ -1,0 +1,4 @@
+include ':app'
+include ':uitest'
+
+apply from: 'tauri.settings.gradle'
