@@ -101,6 +101,7 @@ export function EditMealModal({ meal, onClose }: EditMealModalProps) {
                 value={field.value}
                 onChange={(e) => field.onChange(e.target.value)}
                 onBlur={field.onBlur}
+                className={'text-input'}
               />
             )}
           />
@@ -117,6 +118,7 @@ export function EditMealModal({ meal, onClose }: EditMealModalProps) {
                 value={field.value}
                 onChange={(e) => field.onChange(e.target.value)}
                 onBlur={field.onBlur}
+                className={'text-input'}
               />
             )}
           />

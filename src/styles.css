@@ -153,7 +153,7 @@
   transition: background 0.15s;
 }
 .btn-outline:hover { background: rgba(103,146,137,0.08); }
-.btn-full { width: 100%; margin-top: 12px; }
+.btn-full { width: 100%; margin-top:.8rem; padding: .5rem;}
 
 .btn-ghost {
   background: transparent;
@@ -224,7 +224,8 @@
   justify-content: center;
   padding-top: 0.85rem;
   padding-bottom: 0.85rem;
-  padding
+  padding-left: 0.85rem;
+  padding-right: 0.85rem;
 }
 
 /* Reserves scroll space so the last meal card isn't hidden behind .add-meal-bar. */
@@ -356,6 +357,7 @@
   gap: 10px;
   justify-content: flex-end;
   margin-top: 18px;
+  padding-right: 1rem;
 }
 
 /* Ingredient list */
@@ -412,9 +414,9 @@
 }
 .btn-add-ing:hover { background: rgba(103,146,137,0.2); }
 
-.ing-input-name { flex: 2; min-width: 0; }
+.ing-input-name { flex: 2; min-width: 0; padding-left: .5rem;}
 .ing-input-qty { flex: 1; min-width: 0; }
-.ing-input-unit { flex: 1; min-width: 0; }
+.ing-input-unit { flex: 1; min-width: 0; padding-left: .5rem;}
 
 /* Week planner */
 .week-grid {
@@ -636,9 +638,9 @@
 
 /* Modals render as a bottom sheet on this narrow, phone-like layout */
 .p-dialog.meal-dialog {
-  width: 100%;
+  width: 99%;
   max-width: 600px;
-  margin: 0;
+  margin-bottom: 1.1rem;
   border-radius: var(--radius) var(--radius) 0 0;
 }
 .p-dialog.meal-dialog .p-dialog-content h4 {
@@ -648,6 +650,10 @@
   letter-spacing: 0.05em;
   color: var(--text-muted);
   margin: 16px 0 8px;
+}
+
+.meal-form {
+  padding: .5rem;
 }
 
 /* Slightly taller input boxes in the create/edit meal dialogs (name,
@@ -796,4 +802,8 @@
 .p-dialog .p-dialog-content {
   background: var(--surface);
   color: var(--text);
+}
+
+.text-input {
+  padding-left: .5rem;
 }
