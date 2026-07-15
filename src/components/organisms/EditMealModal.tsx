@@ -88,8 +88,8 @@ export function EditMealModal({ meal, onClose }: EditMealModalProps) {
       dismissableMask
       className="meal-dialog"
     >
-      <form onSubmit={onSave}>
-        <FormField label="Name">
+      <form onSubmit={onSave} className="meal-form">
+        <FormField label="Name" >
           <Controller
             name="name"
             control={control}
@@ -145,8 +145,9 @@ export function EditMealModal({ meal, onClose }: EditMealModalProps) {
             text
             severity="secondary"
             onClick={onClose}
+            className={'btn-actions'}
           />
-          <Button type="submit" label="Save Meal" />
+          <Button type="submit" label="Save Meal" className={'btn-actions'} />
         </div>
       </form>
     </Dialog>

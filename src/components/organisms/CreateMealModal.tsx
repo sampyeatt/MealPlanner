@@ -148,8 +148,9 @@ export function CreateMealModal({ onClose }: CreateMealModalProps) {
             text
             severity="secondary"
             onClick={onClose}
+            className={'btn-actions'}
           />
-          <Button type="submit" label="Create Meal" />
+          <Button type="submit" label="Create Meal" className={'btn-actions'} />
         </div>
       </form>
     </Dialog>

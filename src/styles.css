@@ -807,3 +807,11 @@
 .text-input {
   padding-left: .5rem;
 }
+.picker-dropdown {
+  padding: .5rem;
+}
+
+.btn-actions {
+  min-width: 5rem;
+  padding: .3rem;
+}

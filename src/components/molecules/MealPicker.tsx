@@ -29,6 +29,7 @@ export function MealPicker({
         optionValue="id"
         onChange={(e) => onSelect(e.value)}
         placeholder="-- Select meal --"
+        className="picker-dropdown"
       />
       <div className="picker-actions">
         <Button
@@ -37,8 +38,9 @@ export function MealPicker({
           severity="secondary"
           size="small"
           onClick={onCancel}
+          className={'btn-actions'}
         />
-        <Button label="Add" size="small" onClick={onConfirm} />
+        <Button label="Add" size="small" onClick={onConfirm} className={'btn-actions'} />
       </div>
     </div>
   );
