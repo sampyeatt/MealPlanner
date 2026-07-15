@@ -43,16 +43,7 @@ export function MealsPage() {
     });
 
   return (
-    <ViewLayout
-      title="My Meals"
-      actions={
-        <Button
-          label="Add Meal"
-          icon="pi pi-plus"
-          onClick={() => setModal({ type: "add" })}
-        />
-      }
-    >
+    <ViewLayout title="My Meals">
       {status !== null && (
         <StatusToast message={status} onDismiss={clearStatus} />
       )}
@@ -73,6 +64,19 @@ export function MealsPage() {
           ))}
         </div>
       )}
+
+      {/* Keeps the last card clear of the fixed add-meal bar below. */}
+      <div className="add-meal-bar-spacer" />
+
+      {/* Pinned above the bottom nav so "Add Meal" is always reachable. */}
+      <div className="add-meal-bar">
+        <Button
+          label="Add Meal"
+          icon="pi pi-plus"
+          className="add-meal-btn"
+          onClick={() => setModal({ type: "add" })}
+        />
+      </div>
 
       {modal.type === "add" && <CreateMealModal onClose={closeModal} />}
       {modal.type === "edit" && (

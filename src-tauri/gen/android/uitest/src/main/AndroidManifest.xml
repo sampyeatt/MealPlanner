@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+      Empty host app for the UI test. Needs QUERY_ALL_PACKAGES so the test can resolve
+      com.sam.mealplanner's launch intent on Android 11+ (package visibility).
+    -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission"
+        xmlns:tools="http://schemas.android.com/tools" />
+
+    <application
+        android:allowBackup="false"
+        android:label="MealPlanner UITest" />
+</manifest>
