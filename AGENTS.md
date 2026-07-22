@@ -14,6 +14,8 @@ npm run preview             # serve the built dist/
 
 npx cap sync android        # copy dist/ + plugins into android/
 cd android && ./gradlew assembleDebug   # -> android/app/build/outputs/apk/debug/
+
+python3 android/tools/generate-launcher-icons.py   # rebuild icons from calendar.png
 ```
 
 There is no lint step and no test suite. `npm run build` runs `tsc` first, so
@@ -78,6 +80,12 @@ directory has an `index.ts` barrel; import from the barrel, not the file.
   climbs. Gradle would otherwise generate a fresh key per machine/CI run and
   every update would require an uninstall — which wipes the user's database.
   `versionCode` comes from `-PappVersionCode=<n>`; CI passes the run number.
+- **The launcher icon is generated, not hand-placed.** `android/calendar.png` is
+  the source art; every `res/mipmap-*` PNG and the adaptive background colour
+  come out of `android/tools/generate-launcher-icons.py` and are committed.
+  Nothing in the build regenerates them — `npx cap sync` never touches
+  `res/mipmap-*` — so changing `calendar.png` without re-running the script
+  leaves the old icon shipping, which is exactly what happened once already.
 - **The schema is append-only in practice.** `CREATE TABLE IF NOT EXISTS` never
   alters an existing table, so a new column needs a guarded step in `migrate()`
   in `db.ts` as well as the `SCHEMA` string. Installed apps carry real data.
