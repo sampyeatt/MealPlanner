@@ -4,6 +4,8 @@ export interface Meal {
   id: number;
   name: string;
   description: string;
+  /** Optional link to the recipe (external URL). Empty string when unset. */
+  recipe_url: string;
 }
 
 export interface Ingredient {
@@ -18,6 +20,8 @@ export interface MealWithIngredients {
   id: number;
   name: string;
   description: string;
+  /** Optional link to the recipe (external URL). Empty string when unset. */
+  recipe_url: string;
   ingredients: Ingredient[];
 }
 

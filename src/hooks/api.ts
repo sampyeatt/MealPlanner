@@ -32,9 +32,14 @@ export function useCreateMeal() {
     mutationFn: async (data: {
       name: string;
       description: string;
+      recipeUrl: string;
       ingredients: IngredientDraft[];
     }) => {
-      const meal = await api.createMeal(data.name, data.description);
+      const meal = await api.createMeal(
+        data.name,
+        data.description,
+        data.recipeUrl,
+      );
       for (const ing of data.ingredients) {
         await api.addIngredient(meal.id, ing.name, ing.quantity, ing.unit);
       }
@@ -56,6 +61,7 @@ export function useSaveMeal() {
       meal: MealWithIngredients;
       name: string;
       description: string;
+      recipeUrl: string;
       ingredients: EditIngredient[];
     }) => {
       const keptIds = new Set(
@@ -77,7 +83,12 @@ export function useSaveMeal() {
           ing.unit,
         );
       }
-      await api.updateMeal(data.meal.id, data.name, data.description);
+      await api.updateMeal(
+        data.meal.id,
+        data.name,
+        data.description,
+        data.recipeUrl,
+      );
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: mealsKey });

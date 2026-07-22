@@ -16,6 +16,7 @@ interface EditMealModalProps {
 interface EditMealForm {
   name: string;
   description: string;
+  recipe_url: string;
   ingredients: EditIngredient[];
 }
 
@@ -30,6 +31,7 @@ export function EditMealModal({ meal, onClose }: EditMealModalProps) {
     defaultValues: {
       name: meal.name,
       description: meal.description,
+      recipe_url: meal.recipe_url,
       ingredients: meal.ingredients.map((i) => ({
         id: i.id,
         name: i.name,
@@ -73,7 +75,13 @@ export function EditMealModal({ meal, onClose }: EditMealModalProps) {
     }
 
     saveMeal.mutate(
-      { meal, name: data.name, description: data.description, ingredients },
+      {
+        meal,
+        name: data.name,
+        description: data.description,
+        recipeUrl: data.recipe_url.trim(),
+        ingredients,
+      },
       { onSettled: onClose },
     );
   });
@@ -115,6 +123,25 @@ export function EditMealModal({ meal, onClose }: EditMealModalProps) {
                 id={field.name}
                 ref={field.ref}
                 rows={3}
+                value={field.value}
+                onChange={(e) => field.onChange(e.target.value)}
+                onBlur={field.onBlur}
+                className={'text-input'}
+              />
+            )}
+          />
+        </FormField>
+        <FormField label="Recipe Link">
+          <Controller
+            name="recipe_url"
+            control={control}
+            render={({ field }) => (
+              <TextInput
+                id={field.name}
+                ref={field.ref}
+                type="url"
+                inputMode="url"
+                placeholder="https://example.com/recipe"
                 value={field.value}
                 onChange={(e) => field.onChange(e.target.value)}
                 onBlur={field.onBlur}

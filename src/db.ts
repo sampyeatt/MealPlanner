@@ -19,7 +19,8 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS meals (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
-  description TEXT NOT NULL DEFAULT ''
+  description TEXT NOT NULL DEFAULT '',
+  recipe_url TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS ingredients (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,7 +69,24 @@ export async function initDb(): Promise<void> {
   );
   await conn.open();
   await conn.execute(SCHEMA);
+  await migrate(conn);
   db = conn;
+}
+
+/**
+ * Additive migrations for databases created before a column existed. Each step
+ * is guarded so re-running (or a fresh DB that already has the column) is a
+ * no-op. `CREATE TABLE IF NOT EXISTS` never alters an existing table, so new
+ * columns have to be added here.
+ */
+async function migrate(conn: SQLiteDBConnection): Promise<void> {
+  const info = await conn.query("PRAGMA table_info(meals)");
+  const columns = (info.values ?? []).map((c: { name: string }) => c.name);
+  if (!columns.includes("recipe_url")) {
+    await conn.execute(
+      "ALTER TABLE meals ADD COLUMN recipe_url TEXT NOT NULL DEFAULT ''",
+    );
+  }
 }
 
 /** The open connection. Throws if initDb() hasn't run yet. */

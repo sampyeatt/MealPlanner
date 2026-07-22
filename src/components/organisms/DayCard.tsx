@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { MealWithIngredients, WeekPlanEntry } from "../../types";
-import { IconButton, RemovableChip } from "../atoms";
+import { IconButton, RecipeLink, RemovableChip } from "../atoms";
 import { MealPicker } from "../molecules";
 
 interface DayCardProps {
@@ -48,13 +48,19 @@ export function DayCard({
         />
       </div>
       <div className="day-meals">
-        {entries.map((entry) => (
-          <RemovableChip
-            key={entry.id}
-            label={entry.meal_name}
-            onRemove={() => onRemove(entry.id)}
-          />
-        ))}
+        {entries.map((entry) => {
+          const recipeUrl =
+            meals.find((m) => m.id === entry.meal_id)?.recipe_url ?? "";
+          return (
+            <div key={entry.id} className="day-meal">
+              <RemovableChip
+                label={entry.meal_name}
+                onRemove={() => onRemove(entry.id)}
+              />
+              <RecipeLink url={recipeUrl} />
+            </div>
+          );
+        })}
       </div>
       {picking && (
         <MealPicker

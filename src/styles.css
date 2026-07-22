@@ -418,6 +418,34 @@
 .ing-input-qty { flex: 1; min-width: 0; }
 .ing-input-unit { flex: 1; min-width: 0; padding-left: .5rem;}
 
+/* Recipe link + "import ingredients from link" button, side by side. The
+   width override beats the `.form-group .p-inputtext { width: 100% }` rule
+   further down, which would otherwise stop the input from flexing. */
+.recipe-import-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.recipe-import-row .p-inputtext {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+.btn-import-recipe.p-button {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  width: 38px;
+  flex-shrink: 0;
+  padding: 0;
+}
+.btn-import-recipe.p-button:enabled:hover {
+  background: rgba(103,146,137,0.2);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 /* Week planner */
 .week-grid {
   display: flex;
@@ -447,9 +475,33 @@
 
 .day-meals {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  gap: 8px;
   min-height: 4px;
+}
+
+.day-meal {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+/* Clickable recipe link — used on meal cards and planner day entries. */
+.recipe-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+.recipe-link:hover { color: var(--accent-hover); text-decoration: underline; }
+.recipe-link .pi { font-size: 0.8rem; }
+
+.meal-recipe-link {
+  margin: 4px 0 2px;
 }
 
 .day-meal-chip {

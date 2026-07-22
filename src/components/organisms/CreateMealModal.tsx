@@ -4,6 +4,7 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import type { IngredientDraft } from "../../types";
 import { useCreateMeal } from "../../hooks/api";
+import { importRecipe } from "../../recipeImport";
 import { useUiStore } from "../../store/uiStore";
 import { TextArea, TextInput } from "../atoms";
 import { FormField } from "../molecules";
@@ -16,6 +17,8 @@ interface CreateMealModalProps {
 interface CreateMealForm {
   name: string;
   description: string;
+  /** Optional external link to the recipe. */
+  recipe_url: string;
   /** Ingredients staged with the "+" button. */
   ingredients: IngredientDraft[];
 }
@@ -29,10 +32,10 @@ interface CreateMealForm {
 export function CreateMealModal({ onClose }: CreateMealModalProps) {
   const createMeal = useCreateMeal();
   const setStatus = useUiStore((s) => s.setStatus);
-  const { control, handleSubmit } = useForm<CreateMealForm>({
-    defaultValues: { name: "", description: "", ingredients: [] },
+  const { control, handleSubmit, getValues, setValue } = useForm<CreateMealForm>({
+    defaultValues: { name: "", description: "", recipe_url: "", ingredients: [] },
   });
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "ingredients",
   });
@@ -40,7 +43,46 @@ export function CreateMealModal({ onClose }: CreateMealModalProps) {
   const [newName, setNewName] = useState("");
   const [newQty, setNewQty] = useState<number | null>(1);
   const [newUnit, setNewUnit] = useState("cups");
+  const [importing, setImporting] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
+
+  /**
+   * Pull the ingredients off the linked recipe page and stage them for review.
+   * Name and description only fill in when still blank, so a title the user
+   * already typed is never overwritten; the ingredient list is *replaced* so
+   * importing twice cannot leave duplicate rows behind.
+   */
+  const importFromLink = async () => {
+    const url = getValues("recipe_url").trim();
+    if (!url) {
+      setStatus("Paste a recipe link first.");
+      return;
+    }
+
+    setImporting(true);
+    try {
+      const recipe = await importRecipe(url);
+      if (recipe.name && !getValues("name").trim()) {
+        setValue("name", recipe.name);
+      }
+      if (recipe.description && !getValues("description").trim()) {
+        setValue("description", recipe.description);
+      }
+      replace(recipe.ingredients);
+
+      const count = recipe.ingredients.length;
+      const dropped = recipe.skipped.length
+        ? `, skipped ${recipe.skipped.length} heading${recipe.skipped.length === 1 ? "" : "s"}`
+        : "";
+      setStatus(`Imported ${count} ingredient${count === 1 ? "" : "s"}${dropped}`);
+    } catch (err) {
+      console.error("Failed to import recipe:", err);
+      const reason = err instanceof Error ? err.message : String(err);
+      setStatus(`Could not import recipe: ${reason}`);
+    } finally {
+      setImporting(false);
+    }
+  };
 
   const addDraft = () => {
     const trimmed = newName.trim();
@@ -63,7 +105,12 @@ export function CreateMealModal({ onClose }: CreateMealModalProps) {
     }
 
     createMeal.mutate(
-      { name: data.name, description: data.description, ingredients },
+      {
+        name: data.name,
+        description: data.description,
+        recipeUrl: data.recipe_url.trim(),
+        ingredients,
+      },
       {
         onSuccess: () => {
           setStatus("Meal created!");
@@ -124,6 +171,36 @@ export function CreateMealModal({ onClose }: CreateMealModalProps) {
               />
             )}
           />
+        </FormField>
+        <FormField label="Recipe Link (optional)">
+          <div className="recipe-import-row">
+            <Controller
+              name="recipe_url"
+              control={control}
+              render={({ field }) => (
+                <TextInput
+                  id={field.name}
+                  ref={field.ref}
+                  type="url"
+                  inputMode="url"
+                  placeholder="https://example.com/recipe"
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                  className={'text-input'}
+                />
+              )}
+            />
+            <Button
+              type="button"
+              icon={importing ? "pi pi-spin pi-spinner" : "pi pi-download"}
+              className="btn-import-recipe"
+              aria-label="Import ingredients from link"
+              tooltip="Import ingredients from this link"
+              disabled={importing}
+              onClick={importFromLink}
+            />
+          </div>
         </FormField>
 
         <div className="form-section-label">{"Ingredients"}</div>

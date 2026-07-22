@@ -27,7 +27,7 @@ const getIngredientsForMeal = async (mealId: number): Promise<Ingredient[]> => {
 
 export const getMeals = async (): Promise<MealWithIngredients[]> => {
   const res = await getDb().query(
-    "SELECT id, name, description FROM meals ORDER BY name",
+    "SELECT id, name, description, recipe_url FROM meals ORDER BY name",
   );
   const meals = rows<Meal>(res.values);
   const out: MealWithIngredients[] = [];
@@ -40,24 +40,25 @@ export const getMeals = async (): Promise<MealWithIngredients[]> => {
 export const createMeal = async (
   name: string,
   description: string,
+  recipe_url: string,
 ): Promise<Meal> => {
   const res = await getDb().run(
-    "INSERT INTO meals (name, description) VALUES (?, ?)",
-    [name, description],
+    "INSERT INTO meals (name, description, recipe_url) VALUES (?, ?, ?)",
+    [name, description, recipe_url],
   );
-  return { id: res.changes?.lastId ?? -1, name, description };
+  return { id: res.changes?.lastId ?? -1, name, description, recipe_url };
 };
 
 export const updateMeal = async (
   id: number,
   name: string,
   description: string,
+  recipe_url: string,
 ): Promise<void> => {
-  await getDb().run("UPDATE meals SET name = ?, description = ? WHERE id = ?", [
-    name,
-    description,
-    id,
-  ]);
+  await getDb().run(
+    "UPDATE meals SET name = ?, description = ?, recipe_url = ? WHERE id = ?",
+    [name, description, recipe_url, id],
+  );
 };
 
 export const deleteMeal = async (id: number): Promise<void> => {

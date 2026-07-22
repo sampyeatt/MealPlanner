@@ -1,6 +1,6 @@
 import { Button } from "primereact/button";
 import type { MealWithIngredients } from "../../types";
-import { IconButton } from "../atoms";
+import { IconButton, RecipeLink } from "../atoms";
 
 interface MealCardProps {
   meal: MealWithIngredients;
@@ -46,6 +46,11 @@ export function MealCard({
         </div>
       </div>
       {meal.description && <p className="meal-desc">{meal.description}</p>}
+      {meal.recipe_url && (
+        <div className="meal-recipe-link">
+          <RecipeLink url={meal.recipe_url} label="View Recipe" />
+        </div>
+      )}
       <div className="meal-ingredients-summary">
         <span className="ingredient-count">
           {`${count} ingredient${count === 1 ? "" : "s"}`}
