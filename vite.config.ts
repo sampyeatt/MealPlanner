@@ -12,7 +12,7 @@ export default defineConfig({
     strictPort: false,
     watch: {
       // Rust sources are watched by Tauri, not Vite.
-      ignored: ["**/src-tauri/**"],
+      ignored: ["**/src-tauri/**", "**/android/**"],
     },
   },
 });
