@@ -1,8 +1,13 @@
 name: Build Android APK (sideload)
 
 # Builds a debug .apk you can download from the run's Artifacts and install on a
-# phone (adb install app-debug.apk, or open the file on the device). Debug APKs
-# are signed with Android's debug key, so they sideload without any signing setup.
+# phone (adb install -r app-debug.apk, or open the file on the device).
+#
+# Installing over a previous build updates it in place and keeps the app's data.
+# That relies on two things: the APK is signed with the keystore committed at
+# android/debug.keystore (see android/app/build.gradle) rather than a throwaway
+# key the runner would otherwise generate per run, and versionCode comes from
+# the run number below, so it always climbs.
 
 on:
   workflow_dispatch: {} # manual "Run workflow" button
@@ -60,14 +65,18 @@ jobs:
 
       - name: Build debug APK
         working-directory: android
+        # github.run_number increments per run on this workflow, which is
+        # exactly the monotonic versionCode an in-place update needs.
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon --stacktrace \
+            -PappVersionCode=${{ github.run_number }}
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mealplanner-debug-apk
+          # Version in the name so downloaded APKs stay distinguishable.
+          name: mealplanner-apk-v1.0.${{ github.run_number }}
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14

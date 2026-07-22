@@ -1,14 +1,48 @@
 apply plugin: 'com.android.application'
 
+// --- Sideload updates -------------------------------------------------------
+// Android installs an APK over an already-installed app only when both hold:
+//   1. the new APK is signed with the same key as the installed one, and
+//   2. its versionCode is not lower than the installed one.
+// Fail either and the installer refuses (INSTALL_FAILED_UPDATE_INCOMPATIBLE /
+// INSTALL_FAILED_VERSION_DOWNGRADE) and the only way in is uninstall-first,
+// which wipes the SQLite database with it.
+//
+// Stamp a build with -PappVersionCode=<n>; CI passes the workflow run number so
+// every build is newer than the last. The default keeps plain local builds and
+// Android Studio working.
+def appVersionCode = (project.findProperty('appVersionCode') ?: '1') as Integer
+def appVersionName = project.findProperty('appVersionName') ?: "1.0.${appVersionCode}"
+
 android {
     namespace = "com.sam.mealplanner"
     compileSdk = rootProject.ext.compileSdkVersion
+
+    signingConfigs {
+        debug {
+            // A keystore committed with the project, so every machine and every
+            // CI run signs with the same identity. Gradle otherwise falls back
+            // to ~/.android/debug.keystore and *generates* one where none
+            // exists — a fresh CI runner every time — giving each build a
+            // different key and making updates impossible to install.
+            //
+            // This is a debug key with the conventional public password, so it
+            // is not a secret and grants nothing beyond the ability to build an
+            // APK that updates this app. Swap in a real release keystore (kept
+            // in a GitHub secret, not the repo) if that ever matters.
+            storeFile file('../debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
     defaultConfig {
         applicationId "com.sam.mealplanner"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode appVersionCode
+        versionName appVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
