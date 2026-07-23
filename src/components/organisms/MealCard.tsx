@@ -52,9 +52,12 @@ export function MealCard({
         </div>
       )}
       <div className="meal-ingredients-summary">
-        <span className="ingredient-count">
-          {`${count} ingredient${count === 1 ? "" : "s"}`}
-        </span>
+        <Button
+            tooltip="View & Edit Ingredients"
+            onClick={() => onView(meal)}
+            className="ingredient-count"
+            label={`${count} Ingredient${count === 1 ? "" : "s"}`}
+        />
       </div>
       <Button
         label="Add to Shopping List"
