@@ -136,6 +136,37 @@ export function CreateMealModal({ onClose }: CreateMealModalProps) {
       className="meal-dialog"
     >
       <form onSubmit={submit} className="meal-form">
+        <FormField label="Recipe Link (optional)">
+          <div className="recipe-import-row">
+            <Controller
+                name="recipe_url"
+                control={control}
+                render={({ field }) => (
+                    <TextInput
+                        id={field.name}
+                        ref={field.ref}
+                        type="url"
+                        inputMode="url"
+                        placeholder="https://example.com/recipe"
+                        value={field.value}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        onBlur={field.onBlur}
+                        className={'text-input'}
+                    />
+                )}
+            />
+            <Button
+                type="button"
+                icon={importing ? "pi pi-spin pi-spinner" : ''}
+                label={importing ? '' : 'import'}
+                className="btn-import-recipe"
+                aria-label="Import ingredients from link"
+                tooltip="Import ingredients from this link"
+                disabled={importing}
+                onClick={importFromLink}
+            />
+          </div>
+        </FormField>
         <FormField label="Name">
           <Controller
             name="name"
@@ -171,36 +202,6 @@ export function CreateMealModal({ onClose }: CreateMealModalProps) {
               />
             )}
           />
-        </FormField>
-        <FormField label="Recipe Link (optional)">
-          <div className="recipe-import-row">
-            <Controller
-              name="recipe_url"
-              control={control}
-              render={({ field }) => (
-                <TextInput
-                  id={field.name}
-                  ref={field.ref}
-                  type="url"
-                  inputMode="url"
-                  placeholder="https://example.com/recipe"
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  onBlur={field.onBlur}
-                  className={'text-input'}
-                />
-              )}
-            />
-            <Button
-              type="button"
-              icon={importing ? "pi pi-spin pi-spinner" : "pi pi-download"}
-              className="btn-import-recipe"
-              aria-label="Import ingredients from link"
-              tooltip="Import ingredients from this link"
-              disabled={importing}
-              onClick={importFromLink}
-            />
-          </div>
         </FormField>
 
         <div className="form-section-label">{"Ingredients"}</div>
