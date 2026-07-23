@@ -275,6 +275,11 @@ function isSectionHeader(line: string): boolean {
   return line === line.toUpperCase() && /[A-Z]/.test(line);
 }
 
+/** "cherry tomatoes" -> "Cherry tomatoes". Sites are inconsistent about case. */
+function capitalize(name: string): string {
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
 /**
  * Split one ingredient string into name / quantity / unit. Returns null when
  * the line is a section heading rather than an ingredient.
@@ -316,7 +321,7 @@ export function parseIngredientLine(line: string): IngredientDraft | null {
 
   // Falling back to the whole line keeps an unparseable entry visible and
   // editable rather than staging a nameless row.
-  return { name: rest || text, quantity, unit };
+  return { name: capitalize(rest || text), quantity, unit };
 }
 
 // ---------------------------------------------------------------------------
