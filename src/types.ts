@@ -1,5 +1,11 @@
 export type Tab = "meals" | "planner" | "shopping";
 
+/**
+ * How the meal list is laid out: full cards, or a two-column grid of names
+ * with action buttons only.
+ */
+export type MealView = "expanded" | "compact";
+
 export interface Meal {
   id: number;
   name: string;

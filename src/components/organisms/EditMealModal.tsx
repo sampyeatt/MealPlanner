@@ -89,6 +89,7 @@ export function EditMealModal({ meal, onClose }: EditMealModalProps) {
   return (
     <Dialog
       header="Edit Meal"
+      headerStyle={{padding: '0.5rem'}}
       visible
       onHide={onClose}
       position="bottom"

@@ -244,7 +244,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px 16px;
+  padding: 14px 14px;
 }
 
 .meal-card-header {
@@ -266,11 +266,41 @@
   flex-shrink: 0;
 }
 
+/* Compact view: two columns of name-plus-actions cards. */
+.meal-grid-compact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+}
+
+.meal-card-compact {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+}
+
+.meal-card-compact h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  /* Long single-word names must wrap rather than widen the column. */
+  overflow-wrap: anywhere;
+}
+
+/* Four actions across half a phone width: no gap, and let them share it. */
+.meal-card-compact .meal-card-actions {
+  gap: 0;
+  justify-content: space-between;
+}
+
 .meal-desc {
   color: var(--text-muted);
   font-size: 0.85rem;
   margin-top: 6px;
   margin-bottom: 6px;
+  padding: .3rem;
 }
 
 .meal-ingredients-summary {
@@ -367,6 +397,8 @@
   flex-direction: column;
   gap: 6px;
   margin-bottom: 12px;
+  padding-left: .5rem;
+  padding-right: .5rem;
 }
 
 .ingredient-row {
@@ -692,7 +724,8 @@
 
 /* Modals render as a bottom sheet on this narrow, phone-like layout */
 .p-dialog.meal-dialog {
-  width: 99%;
+  /* Leaves 0.2rem of breathing room on each side of the screen. */
+  width: calc(100% - 0.4rem);
   max-width: 600px;
   margin-bottom: 1.1rem;
   border-radius: var(--radius) var(--radius) 0 0;
@@ -704,6 +737,7 @@
   letter-spacing: 0.05em;
   color: var(--text-muted);
   margin: 16px 0 8px;
+  padding-left: .5rem;
 }
 
 .meal-form {
@@ -722,6 +756,19 @@
 .p-dialog.meal-dialog .modal-actions .p-button {
   padding-top: 0.7rem;
   padding-bottom: 0.7rem;
+}
+
+/* Expanded/compact switch sits in the page header, so keep it small */
+.meal-view-toggle.p-togglebutton.p-button {
+  padding: 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Compact cards squeeze four icon buttons into half a phone width */
+.meal-card-compact .meal-card-actions .p-button.p-button-icon-only {
+  width: 2.1rem;
+  height: 2.1rem;
 }
 
 /* Add-ingredient "+" keeps its compact square footprint */

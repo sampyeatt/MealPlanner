@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "primereact/button";
+import { ToggleButton } from "primereact/togglebutton";
 import type { MealWithIngredients } from "../../types";
 import {
   useAddToShoppingList,
@@ -9,6 +10,7 @@ import {
 import { useUiStore } from "../../store/uiStore";
 import { EmptyState, StatusToast } from "../atoms";
 import {
+  CompactMealCard,
   CreateMealModal,
   EditMealModal,
   MealCard,
@@ -28,6 +30,8 @@ export function MealsPage() {
   const deleteMeal = useDeleteMeal();
   const addToShoppingList = useAddToShoppingList();
   const [modal, setModal] = useState<Modal>({ type: "none" });
+  const mealView = useUiStore((s) => s.mealView);
+  const setMealView = useUiStore((s) => s.setMealView);
   const status = useUiStore((s) => s.status);
   const setStatus = useUiStore((s) => s.setStatus);
   const clearStatus = useUiStore((s) => s.clearStatus);
@@ -42,8 +46,24 @@ export function MealsPage() {
       onSuccess: () => setStatus("Added to shopping list!"),
     });
 
+  const compact = mealView === "compact";
+  const Card = compact ? CompactMealCard : MealCard;
+
+  const viewToggle = (
+    <ToggleButton
+      checked={compact}
+      onChange={(e) => setMealView(e.value ? "compact" : "expanded")}
+      onIcon="pi pi-th-large"
+      offIcon="pi pi-bars"
+      onLabel=""
+      offLabel=""
+      className="meal-view-toggle"
+      aria-label="Toggle meal card size"
+    />
+  );
+
   return (
-    <ViewLayout title="My Meals">
+    <ViewLayout title="My Meals" actions={viewToggle}>
       {status !== null && (
         <StatusToast message={status} onDismiss={clearStatus} />
       )}
@@ -51,9 +71,9 @@ export function MealsPage() {
       {meals.length === 0 ? (
         <EmptyState message="No meals yet. Add your first meal!" />
       ) : (
-        <div className="meal-grid">
+        <div className={compact ? "meal-grid meal-grid-compact" : "meal-grid"}>
           {meals.map((meal) => (
-            <MealCard
+            <Card
               key={meal.id}
               meal={meal}
               onDelete={onDelete}

@@ -29,6 +29,7 @@ export function ViewMealModal({ meal, onClose }: ViewMealModalProps) {
   return (
     <Dialog
       header={current.name}
+      headerStyle={{padding: '0.5rem'}}
       visible
       onHide={onClose}
       position="bottom"

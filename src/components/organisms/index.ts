@@ -1,5 +1,6 @@
 export { IngredientEditor } from "./IngredientEditor";
 export { MealCard } from "./MealCard";
+export { CompactMealCard } from "./CompactMealCard";
 export { DayCard } from "./DayCard";
 export { ShoppingSection } from "./ShoppingSection";
 export { BottomNav } from "./BottomNav";
