@@ -2,9 +2,9 @@ import type { RefObject } from "react";
 import type { IngredientDraft } from "../../types";
 import { IngredientForm, IngredientRow } from "../molecules";
 
-interface IngredientEditorProps {
-  /** Ingredients to display, in order. */
-  items: IngredientDraft[];
+interface EditableProps {
+  /** Show the add row and the per-row remove buttons (the default). */
+  readOnly?: false;
   /** Current value of the name / quantity / unit inputs (controlled). */
   name: string;
   qty: number | null;
@@ -20,23 +20,26 @@ interface IngredientEditorProps {
   onRemove: (idx: number) => void;
 }
 
+interface ReadOnlyProps {
+  /** Render just the list: no add row, no remove buttons. */
+  readOnly: true;
+}
+
+type IngredientEditorProps = {
+  /** Ingredients to display, in order. */
+  items: IngredientDraft[];
+} & (EditableProps | ReadOnlyProps);
+
 /**
  * The ingredient list + inline "add" row, shared by the new-meal and
  * edit-meal modals so both look and behave identically: a list of
- * `IngredientRow`s plus an `IngredientForm` add row.
+ * `IngredientRow`s plus an `IngredientForm` add row. In `readOnly` mode
+ * (the view-meal modal) the editing affordances are left out entirely.
  */
-export function IngredientEditor({
-  items,
-  name,
-  qty,
-  unit,
-  nameRef,
-  onName,
-  onQty,
-  onUnit,
-  onAdd,
-  onRemove,
-}: IngredientEditorProps) {
+export function IngredientEditor(props: IngredientEditorProps) {
+  const { items } = props;
+  const edit = props.readOnly ? null : props;
+
   return (
     <>
       {items.length > 0 && (
@@ -45,22 +48,24 @@ export function IngredientEditor({
             <IngredientRow
               key={idx}
               ingredient={ing}
-              onRemove={() => onRemove(idx)}
+              onRemove={edit ? () => edit.onRemove(idx) : undefined}
             />
           ))}
         </div>
       )}
 
-      <IngredientForm
-        name={name}
-        qty={qty}
-        unit={unit}
-        nameRef={nameRef}
-        onName={onName}
-        onQty={onQty}
-        onUnit={onUnit}
-        onAdd={onAdd}
-      />
+      {edit && (
+        <IngredientForm
+          name={edit.name}
+          qty={edit.qty}
+          unit={edit.unit}
+          nameRef={edit.nameRef}
+          onName={edit.onName}
+          onQty={edit.onQty}
+          onUnit={edit.onUnit}
+          onAdd={edit.onAdd}
+        />
+      )}
     </>
   );
 }
