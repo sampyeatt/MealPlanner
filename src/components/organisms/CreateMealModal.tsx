@@ -128,6 +128,7 @@ export function CreateMealModal({ onClose }: CreateMealModalProps) {
   return (
     <Dialog
       header="Add New Meal"
+      headerStyle={{padding: '0.5rem'}}
       visible
       onHide={onClose}
       position="bottom"
